@@ -1,0 +1,120 @@
+/dts-v1/;
+/*
+ * Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#include "qcom-ipq6018-gl-ax1800.dtsi"
+
+/ {
+	model = "GL Technologies, Inc. AX1800";
+	compatible = "glinet,ax1800", "qcom,ipq6018-cp03", "qcom,ipq6018";
+
+	aliases {
+		serial0 = &blsp1_uart3; //system uart = ttyMSM0
+		serial1 = &blsp1_uart4; //tl8251      = ttyMSM1
+		ethernet3 = "/soc/dp4";
+		ethernet4 = "/soc/dp5";
+	};
+};
+
+&gl_hw {
+	model = "ax1800";
+	lan = "eth1 eth2 eth3 eth4";
+	usb-port = "1-1";
+};
+
+&mdio0 {
+	phy3: ethernet-phy@3 {
+		reg = <3>;
+	};
+	phy4: ethernet-phy@4 {
+		reg = <4>;
+	};
+};
+
+&ess0 {
+	switch_lan_bmp = <0x3c>; /* lan port bitmap */
+
+	qcom,port_phyinfo {
+		port@3 {
+			port_id = <4>;
+			phy_address = <3>;
+		};
+		port@4 {
+			port_id = <5>;
+			phy_address = <4>;
+		};
+	};
+};
+
+&soc {
+	blsp1_uart4: serial@78b2000 {
+		compatible = "qcom,msm-uartdm-v1.4", "qcom,msm-uartdm";
+		reg = <0x78b2000 0x200>;
+		interrupts = <GIC_SPI 307 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&gcc GCC_BLSP1_UART4_APPS_CLK>,
+			<&gcc GCC_BLSP1_AHB_CLK>;
+		clock-names = "core", "iface";
+		status = "disabled";
+	};
+
+	dp4 {
+		device_type = "network";
+		compatible = "qcom,nss-dp";
+		qcom,id = <4>;
+		reg = <0x3a001600 0x200>;
+		qcom,mactype = <0>;
+		local-mac-address = [000000000000];
+		qcom,link-poll = <1>;
+		qcom,phy-mdio-addr = <3>;
+		phy-mode = "sgmii";
+	};
+
+	dp5 {
+		device_type = "network";
+		compatible = "qcom,nss-dp";
+		qcom,id = <5>;
+		reg = <0x3a001800 0x200>;
+		qcom,mactype = <0>;
+		local-mac-address = [000000000000];
+		qcom,link-poll = <1>;
+		qcom,phy-mdio-addr = <4>;
+		phy-mode = "sgmii";
+	};
+};
+
+&tlmm {
+	uart_pins: uart_pins {
+		mux_1 {
+			pins = "gpio42", "gpio43"; // i2c
+			function = "gpio";
+			bias-pull-up;
+		};
+	};
+	uart_tl8251_pins: uart_tl8251_pins {
+		mux {
+			pins = "gpio75", "gpio76"; // gpio 77 reset tl8251
+			function = "blsp3_uart";
+			drive-strength = <8>;
+			bias-pull-down;
+		};
+	};
+};
+
+&blsp1_uart4 {
+	pinctrl-0 = <&uart_tl8251_pins>;
+	pinctrl-names = "default";
+	status = "ok";
+};

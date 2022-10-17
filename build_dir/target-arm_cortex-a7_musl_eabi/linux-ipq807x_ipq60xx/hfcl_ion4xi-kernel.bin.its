@@ -1,0 +1,58 @@
+/dts-v1/;
+
+/ {
+	description = "ARM OpenWrt FIT (Flattened Image Tree)";
+	#address-cells = <1>;
+
+	images {
+		kernel-1 {
+			description = "ARM OpenWrt Linux-4.4.60";
+			data = /incbin/("/home/glinet/work/actions-runner/_work/gl-infra-builder/gl-infra-builder/wlan-ap/openwrt/build_dir/target-arm_cortex-a7_musl_eabi/linux-ipq807x_ipq60xx/hfcl_ion4xi-kernel.bin");
+			type = "kernel";
+			arch = "arm";
+			os = "linux";
+			compression = "gzip";
+			load = <0x41008000>;
+			entry = <0x41008000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+
+		fdt-1 {
+			description = "ARM OpenWrt hfcl_ion4xi device tree blob";
+			
+			data = /incbin/("/home/glinet/work/actions-runner/_work/gl-infra-builder/gl-infra-builder/wlan-ap/openwrt/build_dir/target-arm_cortex-a7_musl_eabi/linux-ipq807x_ipq60xx/image-qcom-ipq6018-hfcl-ion4xi.dtb");
+			type = "flat_dt";
+			
+			arch = "arm";
+			compression = "none";
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+
+
+	};
+
+	configurations {
+		default = "config@cp01-c1";
+		config@cp01-c1 {
+			description = "OpenWrt hfcl_ion4xi";
+			kernel = "kernel-1";
+			fdt = "fdt-1";
+			
+			
+			
+		};
+		
+	};
+};
